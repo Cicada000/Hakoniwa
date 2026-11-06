@@ -152,6 +152,23 @@ public final class PixelEngine {
         OY = Float(Self.H) / 2.0 + originY
     }
     
+    /// Completely flushes all pixel, depth, foliage, and shadow buffers for a clean scene transition.
+    public func reset() {
+        pix = [UInt32](repeating: 0x00000000, count: Self.totalPixels)
+        zb = [Float](repeating: -1e9, count: Self.totalPixels)
+        bakedPix = [UInt32](repeating: 0x00000000, count: Self.totalPixels)
+        bakedZ = [Float](repeating: -1e9, count: Self.totalPixels)
+        ground = [UInt8](repeating: 0, count: Self.totalPixels)
+        shadowMask = [UInt8](repeating: 0, count: Self.totalPixels)
+        groundZ = [Float](repeating: -1e9, count: Self.totalPixels)
+        kinds = [UInt8](repeating: 0, count: Self.totalPixels)
+        staticShadow = [UInt8](repeating: 0, count: Self.totalPixels)
+        tufts.removeAll(keepingCapacity: true)
+        leaves.removeAll(keepingCapacity: true)
+        pendingShadows.removeAll(keepingCapacity: true)
+        rampCache.removeAll(keepingCapacity: true)
+    }
+    
     public func restoreBaked() {
         _ = bakedPix.withUnsafeBufferPointer { bPix in
             pix.withUnsafeMutableBufferPointer { pPix in

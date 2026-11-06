@@ -71,6 +71,56 @@ public enum AppThemeMode: String, CaseIterable, Identifiable {
     }
 }
 
+public enum SceneType: String, CaseIterable, Identifiable {
+    case balote = "balote"
+    case zenBonsai = "zen_bonsai"
+    case monumentBuilder = "monument_builder"
+    case pachinko = "pachinko"
+    case aquariumPond = "aquarium_pond"
+    
+    public var id: String { rawValue }
+    
+    public var title: String {
+        switch self {
+        case .balote: return "法式滚球 (Balote)"
+        case .zenBonsai: return "禅意盆景 (Zen Bonsai)"
+        case .monumentBuilder: return "微缩建造 (Builder)"
+        case .pachinko: return "弹珠连击 (Pachinko)"
+        case .aquariumPond: return "浮岛鱼塘 (Aquarium)"
+        }
+    }
+    
+    public var icon: String {
+        switch self {
+        case .balote: return "circle.circle.fill"
+        case .zenBonsai: return "leaf.fill"
+        case .monumentBuilder: return "hammer.fill"
+        case .pachinko: return "flame.fill"
+        case .aquariumPond: return "drop.fill"
+        }
+    }
+    
+    public var subtitle: String {
+        switch self {
+        case .balote: return "经典 3D 滚球投掷与 AI 对弈"
+        case .zenBonsai: return "打字蓄养分，盆景抽枝繁花"
+        case .monumentBuilder: return "敲击搬砖筑屋，点亮烟囱炊烟"
+        case .pachinko: return "打字蓄能弹珠，一键倾泻解压"
+        case .aquariumPond: return "清澈浮岛鱼塘，点击水波喂食"
+        }
+    }
+    
+    public func createScene() -> HakoniwaScene {
+        switch self {
+        case .balote: return BaloteScene()
+        case .zenBonsai: return ZenBonsaiScene()
+        case .monumentBuilder: return MonumentBuilderScene()
+        case .pachinko: return PachinkoScene()
+        case .aquariumPond: return AquariumPondScene()
+        }
+    }
+}
+
 public enum WallpaperBackgroundStyle: String, CaseIterable, Identifiable {
     case solid = "solid"
     case transparent = "transparent"
@@ -91,12 +141,21 @@ public final class AppSettings: ObservableObject {
     @AppStorage("closeBehavior") public var closeBehaviorRaw: String = CloseBehavior.keepInDock.rawValue
     @AppStorage("targetFPS") public var targetFPS: Int = 60
     @AppStorage("themeMode") public var themeModeRaw: String = AppThemeMode.system.rawValue
+    @AppStorage("currentSceneType") public var currentSceneTypeRaw: String = SceneType.balote.rawValue
     @AppStorage("wallpaperBackgroundStyle") public var wallpaperBackgroundStyleRaw: String = WallpaperBackgroundStyle.solid.rawValue
     @AppStorage("desktopInteractionEnabled") public var desktopInteractionEnabled: Bool = true
     @AppStorage("desktopScale") public var desktopScaleRaw: Double = 0.90
     @AppStorage("soundVolume") public var soundVolume: Double = 1.0 {
         didSet {
             SoundManager.shared.volume = Float(soundVolume)
+        }
+    }
+    
+    public var currentSceneType: SceneType {
+        get { SceneType(rawValue: currentSceneTypeRaw) ?? .balote }
+        set {
+            currentSceneTypeRaw = newValue.rawValue
+            objectWillChange.send()
         }
     }
     

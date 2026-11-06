@@ -17,7 +17,7 @@ public struct SettingsView: View {
                 .tabItem {
                     Label("通用", systemImage: "gearshape")
                 }
-                .frame(width: 520, height: 350)
+                .frame(width: 520, height: 420)
             
             WallpaperSettingsTab(settings: settings, appModel: appModel)
                 .tabItem {
@@ -46,6 +46,37 @@ private struct GeneralSettingsTab: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
+            // 箱庭场景切换
+            VStack(alignment: .leading, spacing: 6) {
+                Text("箱庭场景")
+                    .font(.system(size: 13, weight: .semibold))
+                
+                HStack {
+                    Text("当前沙盘主题")
+                        .font(.system(size: 13))
+                    Spacer()
+                    Picker("", selection: Binding(
+                        get: { settings.currentSceneType },
+                        set: { newType in
+                            HakoniwaAppModel.shared.switchScene(to: newType)
+                        }
+                    )) {
+                        ForEach(SceneType.allCases) { item in
+                            Label(item.title, systemImage: item.icon).tag(item)
+                        }
+                    }
+                    .labelsHidden()
+                    .frame(width: 250)
+                }
+                
+                Text(settings.currentSceneType.subtitle)
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            
+            Divider()
+            
             // 窗口管理
             VStack(alignment: .leading, spacing: 6) {
                 Text("窗口管理")
@@ -184,7 +215,7 @@ private struct WallpaperSettingsTab: View {
                     .disabled(!appModel.isWallpaperEnabled)
                     .font(.system(size: 13))
                 
-                Text("开启后，当 Finder 处于最前台且点击桌面空白处时，可拖拽控制地滚球蓄力与投掷。")
+                Text("开启后，当 Finder 处于最前台且点击桌面空白处时，可与当前像素箱庭进行鼠标实时互动（如投掷地滚球、水面喂鱼、倾泻弹珠等）。")
                     .font(.system(size: 11))
                     .foregroundColor(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

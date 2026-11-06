@@ -12,16 +12,16 @@ struct PixelCanvasRepresentable: NSViewRepresentable {
     func makeNSView(context: Context) -> PixelCanvasNSView {
         let view = PixelCanvasNSView(frame: .zero)
         view.onPointerDown = { pt in
-            appModel.currentScene.handlePointerDown(screenPoint: pt)
+            appModel.handlePointerDown(screenPoint: pt)
         }
         view.onPointerMove = { pt in
-            appModel.currentScene.handlePointerMove(screenPoint: pt)
+            appModel.handlePointerMove(screenPoint: pt)
         }
         view.onPointerUp = {
-            appModel.currentScene.handlePointerUp()
+            appModel.handlePointerUp()
         }
         view.onActionKey = {
-            appModel.currentScene.handleActionKey()
+            appModel.handleActionKey()
         }
         
         appModel.onFrameRendered = { [weak view] pixels in
@@ -61,6 +61,17 @@ struct ContentView: View {
             : Color(red: 242/255, green: 243/255, blue: 246/255)
     }
     
+    private var actionHintText: String {
+        switch appModel.currentScene.sceneId {
+        case "balote": return "投球 (Throw)"
+        case "zen_bonsai": return "浇水 (Water)"
+        case "monument_builder": return "筑砖 (Hammer)"
+        case "pachinko": return "倾泻 (Release)"
+        case "aquarium_pond": return "投喂 (Feed)"
+        default: return "操作 (Action)"
+        }
+    }
+    
     var body: some View {
         ZStack {
             WindowAccessor { win in
@@ -91,7 +102,7 @@ struct ContentView: View {
                     // Keyboard Shortcut Hints
                     HStack(spacing: 6) {
                         KeyBadge(text: "Space")
-                        Text("Throw")
+                        Text(actionHintText)
                             .font(.system(size: 11, weight: .regular))
                             .foregroundColor(.secondary)
                     }
@@ -115,26 +126,27 @@ struct ContentView: View {
             // Leading: Scene Selector Menu
             ToolbarItem(placement: .navigation) {
                 Menu {
-                    Button(action: { selectedScene = "balote" }) {
-                        Label("Balote (Bocce)", systemImage: "circle.circle.fill")
-                    }
-                    Divider()
-                    Section("More Dioramas Coming Soon") {
-                        Label("Stari Most (Bridge Dive)", systemImage: "water.waves")
-                            .foregroundColor(.secondary)
-                        Label("Rooftop Laundry", systemImage: "tshirt")
-                            .foregroundColor(.secondary)
-                        Label("Tie-Break (Tennis)", systemImage: "tennisball")
-                            .foregroundColor(.secondary)
-                        Label("Mini Ramp (Skateboard)", systemImage: "figure.skating")
-                            .foregroundColor(.secondary)
+                    ForEach(SceneType.allCases) { item in
+                        Button(action: {
+                            withAnimation(.spring(response: 0.35)) {
+                                appModel.switchScene(to: item)
+                            }
+                        }) {
+                            HStack {
+                                Label(item.title, systemImage: item.icon)
+                                if appModel.currentScene.sceneId == item.id {
+                                    Spacer()
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                        }
                     }
                 } label: {
                     HStack(spacing: 6) {
-                        Image(systemName: "sparkles")
+                        Image(systemName: appModel.currentScene.sceneIcon)
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(.accentColor)
-                        Text("Balote")
+                        Text(appModel.currentScene.sceneName)
                             .font(.system(size: 13, weight: .semibold))
                         Image(systemName: "chevron.up.chevron.down")
                             .font(.system(size: 10))

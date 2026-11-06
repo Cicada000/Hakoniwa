@@ -91,7 +91,7 @@ public final class WallpaperManager {
             let ptInWin = win.convertPoint(fromScreen: screenPt)
             let ptInView = view.convert(ptInWin, from: nil)
             if let canvasPt = view.convertToCanvas(point: ptInView, checkBounds: true) {
-                HakoniwaAppModel.shared.currentScene.handlePointerDown(screenPoint: canvasPt)
+                HakoniwaAppModel.shared.handlePointerDown(screenPoint: canvasPt)
                 return true
             }
             return false
@@ -103,12 +103,12 @@ public final class WallpaperManager {
             let ptInWin = win.convertPoint(fromScreen: screenPt)
             let ptInView = view.convert(ptInWin, from: nil)
             if let canvasPt = view.convertToCanvas(point: ptInView, checkBounds: false) {
-                HakoniwaAppModel.shared.currentScene.handlePointerMove(screenPoint: canvasPt)
+                HakoniwaAppModel.shared.handlePointerMove(screenPoint: canvasPt)
             }
         }
         
         eventMonitor.onGlobalMouseUp = {
-            HakoniwaAppModel.shared.currentScene.handlePointerUp()
+            HakoniwaAppModel.shared.handlePointerUp()
         }
     }
     

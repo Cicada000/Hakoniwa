@@ -17,6 +17,11 @@ public enum SoundEffect {
     case board(amount: Float)
     case whoosh
     case point
+    case waterDrop
+    case hammer
+    case bell
+    case bubble
+    case splash
 }
 
 public final class SoundManager {
@@ -34,6 +39,10 @@ public final class SoundManager {
     private let sampleRate: Double = 44100.0
     private let format: AVAudioFormat
     
+    // Audio throttling: prevents queuing hundreds of sounds into a long repeating buffer backlog
+    private var lastSoundTimes: [String: CFTimeInterval] = [:]
+    private let minInterval: CFTimeInterval = 0.045
+    
     private init() {
         format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1)!
         engine.attach(player)
@@ -41,8 +50,35 @@ public final class SoundManager {
         try? engine.start()
     }
     
+    public func stopAll() {
+        player.stop()
+        player.reset()
+        lastSoundTimes.removeAll()
+    }
+    
     public func play(_ effect: SoundEffect) {
         guard !isMuted else { return }
+        
+        let now = CACurrentMediaTime()
+        let effectKey: String = {
+            switch effect {
+            case .clack: return "clack"
+            case .thud: return "thud"
+            case .board: return "board"
+            case .whoosh: return "whoosh"
+            case .point: return "point"
+            case .waterDrop: return "waterDrop"
+            case .hammer: return "hammer"
+            case .bell: return "bell"
+            case .bubble: return "bubble"
+            case .splash: return "splash"
+            }
+        }()
+        
+        if let last = lastSoundTimes[effectKey], (now - last) < minInterval {
+            return // Throttled: drop to prevent buffer queue flood
+        }
+        lastSoundTimes[effectKey] = now
         
         let (f0, f1, duration, gain, waveType): (Float, Float, Float, Float, Int) = {
             switch effect {
@@ -56,6 +92,16 @@ public final class SoundManager {
                 return (320, 180, 0.10, 0.035, 2) // triangle
             case .point:
                 return (660, 880, 0.16, 0.08, 2) // triangle
+            case .waterDrop:
+                return (1400, 750, 0.08, 0.22, 0) // sine drop
+            case .hammer:
+                return (380, 130, 0.06, 0.26, 1) // square wood knock
+            case .bell:
+                return (1760, 1760, 0.28, 0.20, 0) // high pure chime
+            case .bubble:
+                return (420, 960, 0.08, 0.18, 0) // upward sine sweep
+            case .splash:
+                return (320, 80, 0.12, 0.22, 2) // triangle splash
             }
         }()
         

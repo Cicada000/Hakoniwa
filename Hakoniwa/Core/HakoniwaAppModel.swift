@@ -38,17 +38,67 @@ public final class HakoniwaAppModel: ObservableObject {
     
     private var displayLink: CVDisplayLink?
     private var lastTime: CFTimeInterval = CACurrentMediaTime()
+    private let renderLock = NSLock()
     
     // Callback for any preview window (e.g. in ContentView)
     public var onFrameRendered: (([UInt32]) -> Void)?
     
     private init() {
+        currentScene = AppSettings.shared.currentSceneType.createScene()
         setupScene()
+        setupKeystrokeMonitor()
         setupDisplayLink()
         setupThemeObserver()
         DispatchQueue.main.async { [weak self] in
             self?.updateDockIcon()
         }
+    }
+    
+    private func setupKeystrokeMonitor() {
+        KeystrokeMonitor.shared.onKeystroke = { [weak self] in
+            guard let self = self else { return }
+            if self.renderLock.try() {
+                defer { self.renderLock.unlock() }
+                self.currentScene.handleKeystroke()
+            }
+        }
+    }
+    
+    public func switchScene(to type: SceneType) {
+        renderLock.lock()
+        defer { renderLock.unlock() }
+        
+        SoundManager.shared.stopAll()
+        AppSettings.shared.currentSceneType = type
+        engine.reset()
+        let newScene = type.createScene()
+        newScene.bake(engine: engine)
+        self.currentScene = newScene
+        self.hudStatusText = newScene.statusDescription
+    }
+    
+    public func handlePointerDown(screenPoint: CGPoint) {
+        renderLock.lock()
+        defer { renderLock.unlock() }
+        currentScene.handlePointerDown(screenPoint: screenPoint)
+    }
+    
+    public func handlePointerMove(screenPoint: CGPoint) {
+        renderLock.lock()
+        defer { renderLock.unlock() }
+        currentScene.handlePointerMove(screenPoint: screenPoint)
+    }
+    
+    public func handlePointerUp() {
+        renderLock.lock()
+        defer { renderLock.unlock() }
+        currentScene.handlePointerUp()
+    }
+    
+    public func handleActionKey() {
+        renderLock.lock()
+        defer { renderLock.unlock() }
+        currentScene.handleActionKey()
     }
     
     private func setupThemeObserver() {
@@ -74,6 +124,9 @@ public final class HakoniwaAppModel: ObservableObject {
     }
     
     public func setupScene() {
+        renderLock.lock()
+        defer { renderLock.unlock() }
+        engine.reset()
         currentScene.bake(engine: engine)
     }
     
@@ -120,6 +173,12 @@ public final class HakoniwaAppModel: ObservableObject {
             return
         }
         
+        // Ensure atomic rendering: skip tick if scene is switching or baking
+        guard renderLock.try() else {
+            return
+        }
+        defer { renderLock.unlock() }
+        
         let now = CACurrentMediaTime()
         let targetFPS = Double(AppSettings.shared.targetFPS)
         let minInterval = 1.0 / max(1.0, targetFPS)
@@ -141,14 +200,18 @@ public final class HakoniwaAppModel: ObservableObject {
         }
         
         // Sync HUD snapshot if changed
+        let status = currentScene.statusDescription
+        if hudStatusText != status {
+            DispatchQueue.main.async { [weak self] in
+                self?.hudStatusText = status
+            }
+        }
         if let balote = currentScene as? BaloteScene {
-            let status = balote.statusText
             let scores = balote.score
             let left = balote.left
             let team = balote.team
-            if hudStatusText != status || hudScores != scores || hudLeft != left || hudTeam != team {
+            if hudScores != scores || hudLeft != left || hudTeam != team {
                 DispatchQueue.main.async { [weak self] in
-                    self?.hudStatusText = status
                     self?.hudScores = scores
                     self?.hudLeft = left
                     self?.hudTeam = team

@@ -43,6 +43,9 @@ public struct BaloteResult {
 
 public final class BaloteScene: HakoniwaScene {
     public let sceneId = "balote"
+    public let sceneName = "法式滚球 (Balote)"
+    public let sceneIcon = "circle.circle.fill"
+    public var statusDescription: String { statusText }
     public let originY: Float = 22.0
     public let shadowX: Float = 1.3
     public let shadowY: Float = -0.12
@@ -191,12 +194,10 @@ public final class BaloteScene: HakoniwaScene {
     }
     
     public func bake(engine: PixelEngine) {
+        engine.reset()
         engine.originY = originY
         engine.shadowX = shadowX
         engine.shadowY = shadowY
-        
-        engine.zb = [Float](repeating: -1e9, count: PixelEngine.totalPixels)
-        engine.pix = [UInt32](repeating: 0x00000000, count: PixelEngine.totalPixels)
         
         for iy in 0..<PixelEngine.H {
             let rowOffset = iy * PixelEngine.W

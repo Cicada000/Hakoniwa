@@ -29,6 +29,24 @@ struct MenuBarContent: View {
         }
         .keyboardShortcut("o")
         
+        Menu("切换箱庭场景") {
+            ForEach(SceneType.allCases) { item in
+                Button(action: {
+                    appModel.switchScene(to: item)
+                }) {
+                    HStack {
+                        Text(item.title)
+                        if appModel.currentScene.sceneId == item.id {
+                            Spacer()
+                            Image(systemName: "checkmark")
+                        }
+                    }
+                }
+            }
+        }
+        
+        Divider()
+        
         Toggle("桌面动态壁纸", isOn: $appModel.isWallpaperEnabled)
         Toggle("暂停画面动画", isOn: $appModel.isPaused)
         Toggle("静音音效", isOn: $appModel.isMuted)
