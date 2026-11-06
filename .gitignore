@@ -1,0 +1,27 @@
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xcuserdata
+*.xcuserdatad
+*.xcscmblueprint
+*.xccheckout
+
+# Build artifacts & distribution packages
+dist/
+*.dmg
+*.app
+*.dSYM/
+
+# Swift Package Manager (if applicable)
+.build/
+Packages/
