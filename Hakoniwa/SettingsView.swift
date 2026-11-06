@@ -17,23 +17,26 @@ public struct SettingsView: View {
                 .tabItem {
                     Label("通用", systemImage: "gearshape")
                 }
+                .frame(width: 520, height: 350)
             
             WallpaperSettingsTab(settings: settings, appModel: appModel)
                 .tabItem {
                     Label("壁纸与交互", systemImage: "desktopcomputer")
                 }
+                .frame(width: 520, height: 490)
             
             AudioSettingsTab(settings: settings, appModel: appModel)
                 .tabItem {
                     Label("音效", systemImage: "speaker.wave.2")
                 }
+                .frame(width: 520, height: 230)
             
             AboutSettingsTab()
                 .tabItem {
                     Label("关于", systemImage: "info.circle")
                 }
+                .frame(width: 520, height: 260)
         }
-        .frame(width: 530, height: 480)
     }
 }
 
@@ -120,6 +123,7 @@ private struct GeneralSettingsTab: View {
         }
         .padding(.horizontal, 28)
         .padding(.vertical, 20)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 }
 
@@ -129,9 +133,9 @@ private struct WallpaperSettingsTab: View {
     @ObservedObject var appModel: HakoniwaAppModel
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: 14) {
             // 动态壁纸
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 5) {
                 Text("动态壁纸")
                     .font(.system(size: 13, weight: .semibold))
                 
@@ -148,7 +152,7 @@ private struct WallpaperSettingsTab: View {
             Divider()
             
             // 壁纸背景风格
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text("壁纸背景风格")
                     .font(.system(size: 13, weight: .semibold))
                 
@@ -171,7 +175,7 @@ private struct WallpaperSettingsTab: View {
             Divider()
             
             // 桌面交互
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 5) {
                 Text("桌面交互")
                     .font(.system(size: 13, weight: .semibold))
                 
@@ -189,7 +193,7 @@ private struct WallpaperSettingsTab: View {
             Divider()
             
             // 画面尺寸 (完全无级平滑调节，去除刻度)
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 6) {
                 HStack {
                     Text("画面尺寸")
                         .font(.system(size: 13, weight: .semibold))
@@ -204,7 +208,6 @@ private struct WallpaperSettingsTab: View {
                         .font(.system(size: 12))
                         .foregroundColor(.secondary)
                     
-                    // 无级平滑调节滑块（无 step 参数即无刻度线）
                     Slider(value: $settings.desktopScale, in: 0.5...1.2)
                     
                     Image(systemName: "photo.fill")
@@ -243,7 +246,7 @@ private struct WallpaperSettingsTab: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
-            .padding(12)
+            .padding(10)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color(NSColor.controlBackgroundColor))
             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
@@ -251,7 +254,8 @@ private struct WallpaperSettingsTab: View {
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 28)
-        .padding(.vertical, 20)
+        .padding(.vertical, 16)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 }
 
@@ -317,6 +321,7 @@ private struct AudioSettingsTab: View {
         }
         .padding(.horizontal, 28)
         .padding(.vertical, 20)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 }
 
@@ -348,11 +353,10 @@ private struct AboutSettingsTab: View {
             Divider()
             
             HStack {
-                Text("Based on Pixel Plays by AmirMushich & abhi")
+                Link("Based on Pixel Plays (Amir Mushich)", destination: URL(string: "https://github.com/amirmushichge/pixel-plays")!)
                     .font(.caption2)
-                    .foregroundColor(.secondary)
                 Spacer()
-                Text("Native macOS • Metal-Free • 60 FPS")
+                Text("MIT License")
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }

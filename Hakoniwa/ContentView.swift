@@ -259,11 +259,11 @@ struct RulesPopoverView: View {
             Divider()
             
             HStack {
-                Text("Based on Pixel Plays by AmirMushich & abhi")
+                Text("Based on Pixel Plays by Amir Mushich")
                     .font(.caption2)
                     .foregroundColor(Color(NSColor.tertiaryLabelColor))
                 Spacer()
-                Text("Native Swift 60 FPS")
+                Text("MIT License")
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
